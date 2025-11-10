@@ -45,3 +45,7 @@ Route::middleware(['auth:petugas'])->prefix('petugas')->group(function () {
 
 // Public Route for viewing complaints
 Route::get('pengaduan/{pengaduan}', [PengaduanController::class, 'show'])->name('pengaduan.show');
+
+Route::get('/login-masyarakat', function () {
+    return redirect()->route('login.masyarakat');
+});
