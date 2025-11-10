@@ -11,7 +11,20 @@ return new class extends Migration
      */
     public function up(): void
     {
-        //
+        Schema::create('pengaduan', function (Blueprint $table) {
+            $table->id('id_pengaduan');
+            $table->unsignedBigInteger('id_masyarakat');
+            $table->dateTime('tanggal_pengaduan');
+            $table->text('isi_laporan');
+            $table->string('foto')->nullable();
+            $table->enum('status', ['baru', 'diproses', 'selesai'])->default('baru');
+            $table->timestamps();
+
+            $table->foreign('id_masyarakat')
+                ->references('id_masyarakat')
+                ->on('masyarakat')
+                ->onDelete('cascade');
+        });
     }
 
     /**
@@ -19,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        Schema::dropIfExists('pengaduan');
     }
 };
