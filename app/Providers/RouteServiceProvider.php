@@ -13,8 +13,6 @@ class RouteServiceProvider extends ServiceProvider
     /**
      * The path to the "home" route for your application.
      *
-     * Typically, users are redirected here after authentication.
-     *
      * @var string
      */
     public const HOME = '/home';
@@ -26,11 +24,15 @@ class RouteServiceProvider extends ServiceProvider
     {
         $this->configureRateLimiting();
 
+        // 🔹 Pastikan Laravel memuat semua route dengan benar
         $this->routes(function () {
-            Route::middleware('api')
-                ->prefix('api')
+
+            // Route untuk API
+            Route::prefix('api')
+                ->middleware('api')
                 ->group(base_path('routes/api.php'));
 
+            // Route untuk web (auth, masyarakat, petugas, dll)
             Route::middleware('web')
                 ->group(base_path('routes/web.php'));
         });
