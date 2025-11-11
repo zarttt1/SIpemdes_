@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PengaduanController;
 use App\Http\Controllers\TanggapanController;
+use App\Http\Controllers\MasyarakatController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -20,7 +21,7 @@ Route::get('/', function () {
 |--------------------------------------------------------------------------
 */
 Route::prefix('auth')->group(function () {
-    // Login umum (bisa masyarakat/petugas)
+    // Login umum (masyarakat/petugas)
     Route::get('login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('login', [AuthController::class, 'processLogin'])->name('login.process');
 
@@ -38,10 +39,10 @@ Route::prefix('auth')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth:web'])->prefix('masyarakat')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard.masyarakat');
-    })->name('dashboard.masyarakat');
+    // Dashboard masyarakat
+    Route::get('/dashboard', [MasyarakatController::class, 'dashboard'])->name('dashboard.masyarakat');
 
+    // Semua fitur pengaduan (index, create, store, show, dll)
     Route::resource('pengaduan', PengaduanController::class);
 });
 

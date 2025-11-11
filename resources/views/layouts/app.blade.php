@@ -8,7 +8,7 @@
     <style>
         :root {
             --primary-blue: #0B5ED7;
-            --light-blue: #0D6EFD;
+            --light-blue: #062c66ff;
             --dark-blue: #054FBE;
             --accent-blue: #40B4F5;
             --light-gray: #F8F9FA;
@@ -123,7 +123,8 @@
 <body class="page-container">
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
-            <a class="navbar-brand" href="/">SIPEMDES</a>
+            <a class="navbar-brand" href="/">Sistem Informasi Pengaduan Masyarakat Desa
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
