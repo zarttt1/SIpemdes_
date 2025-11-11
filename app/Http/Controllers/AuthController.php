@@ -10,7 +10,50 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    // Masyarakat Registration
+    /**
+     * ======================
+     *  LOGIN UMUM
+     * ======================
+     */
+    public function showLogin()
+    {
+        return view('auth.login');
+    }
+
+    public function processLogin(Request $request)
+    {
+        $request->validate([
+            'username' => 'required|string',
+            'password' => 'required|string',
+        ]);
+
+        // 🔹 1. Login masyarakat
+        $masyarakat = Masyarakat::where('username', $request->username)->first();
+        if ($masyarakat && Hash::check($request->password, $masyarakat->password)) {
+            Auth::guard('web')->login($masyarakat);
+            $request->session()->regenerate();
+            return redirect()->route('dashboard.masyarakat');
+        }
+
+        // 🔹 2. Login petugas
+        $petugas = Petugas::where('username', $request->username)->first();
+        if ($petugas && Hash::check($request->password, $petugas->password)) {
+            Auth::guard('petugas')->login($petugas);
+            $request->session()->regenerate();
+            return redirect()->route('dashboard.petugas');
+        }
+
+        // 🔹 3. Gagal login
+        return back()->withErrors([
+            'username' => 'Username atau password salah.',
+        ])->withInput();
+    }
+
+    /**
+     * ======================
+     *  REGISTER MASYARAKAT
+     * ======================
+     */
     public function showMasyarakatRegister()
     {
         return view('auth.register-masyarakat');
@@ -19,12 +62,12 @@ class AuthController extends Controller
     public function registerMasyarakat(Request $request)
     {
         $request->validate([
-            'nik' => 'required|unique:masyarakat,nik|digits:16',
+            'nik' => 'required|digits:16|unique:masyarakat,nik',
             'nama' => 'required|string|max:100',
             'alamat' => 'required|string',
             'no_hp' => 'required|string|max:15',
-            'username' => 'required|unique:masyarakat,username|string|max:50',
-            'email' => 'required|unique:masyarakat,email|email',
+            'username' => 'required|string|max:50|unique:masyarakat,username',
+            'email' => 'required|email|unique:masyarakat,email',
             'password' => 'required|min:8|confirmed',
         ]);
 
@@ -38,57 +81,26 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        return redirect()->route('login.masyarakat')
+        return redirect()->route('login')
             ->with('success', 'Registrasi berhasil! Silakan login.');
     }
 
-    // Masyarakat Login
-    public function showMasyarakatLogin()
-    {
-        return view('auth.login-masyarakat');
-    }
-
-    public function loginMasyarakat(Request $request)
-    {
-        $credentials = $request->validate([
-            'username' => 'required',
-            'password' => 'required',
-        ]);
-
-        if (Auth::guard('web')->attempt(['username' => $credentials['username'], 'password' => $credentials['password']])) {
-            return redirect()->intended('/masyarakat/dashboard');
-        }
-
-        return back()->with('error', 'Username atau password salah.');
-    }
-
-    // Petugas Login
-    public function showPetugasLogin()
-    {
-        return view('auth.login-petugas');
-    }
-
-    public function loginPetugas(Request $request)
-    {
-        $credentials = $request->validate([
-            'username' => 'required',
-            'password' => 'required',
-        ]);
-
-        if (Auth::guard('petugas')->attempt(['username' => $credentials['username'], 'password' => $credentials['password']])) {
-            return redirect()->intended('/petugas/dashboard');
-        }
-
-        return back()->with('error', 'Username atau password salah.');
-    }
-
-    // Logout
+    /**
+     * ======================
+     *  LOGOUT
+     * ======================
+     */
     public function logout(Request $request)
     {
-        Auth::logout();
+        if (Auth::guard('petugas')->check()) {
+            Auth::guard('petugas')->logout();
+        } elseif (Auth::guard('web')->check()) {
+            Auth::guard('web')->logout();
+        }
+
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect()->route('login')->with('success', 'Anda telah logout.');
     }
 }

@@ -5,47 +5,57 @@ use App\Http\Controllers\PengaduanController;
 use App\Http\Controllers\TanggapanController;
 use Illuminate\Support\Facades\Route;
 
+/*
+|--------------------------------------------------------------------------
+| Redirect awal
+|--------------------------------------------------------------------------
+*/
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
 });
 
-// Authentication Routes
+/*
+|--------------------------------------------------------------------------
+| AUTHENTICATION (LOGIN, REGISTER, LOGOUT)
+|--------------------------------------------------------------------------
+*/
 Route::prefix('auth')->group(function () {
+    // Login umum (bisa masyarakat/petugas)
+    Route::get('login', [AuthController::class, 'showLogin'])->name('login');
+    Route::post('login', [AuthController::class, 'processLogin'])->name('login.process');
+
+    // Register khusus masyarakat
     Route::get('register-masyarakat', [AuthController::class, 'showMasyarakatRegister'])->name('register.masyarakat');
     Route::post('register-masyarakat', [AuthController::class, 'registerMasyarakat'])->name('register.masyarakat.store');
-    
-    Route::get('login-masyarakat', [AuthController::class, 'showMasyarakatLogin'])->name('login.masyarakat');
-    Route::post('login-masyarakat', [AuthController::class, 'loginMasyarakat']);
-    
-    Route::get('login-petugas', [AuthController::class, 'showPetugasLogin'])->name('login.petugas');
-    Route::post('login-petugas', [AuthController::class, 'loginPetugas']);
-    
+
+    // Logout (umum untuk semua guard)
     Route::post('logout', [AuthController::class, 'logout'])->name('logout');
 });
 
-// Masyarakat Routes
+/*
+|--------------------------------------------------------------------------
+| DASHBOARD & FITUR MASYARAKAT
+|--------------------------------------------------------------------------
+*/
 Route::middleware(['auth:web'])->prefix('masyarakat')->group(function () {
-    Route::get('dashboard', function () {
-        return view('masyarakat.dashboard');
-    })->name('masyarakat.dashboard');
-    
+    Route::get('/dashboard', function () {
+        return view('dashboard.masyarakat');
+    })->name('dashboard.masyarakat');
+
     Route::resource('pengaduan', PengaduanController::class);
 });
 
-// Petugas Routes
+/*
+|--------------------------------------------------------------------------
+| DASHBOARD & FITUR PETUGAS
+|--------------------------------------------------------------------------
+*/
 Route::middleware(['auth:petugas'])->prefix('petugas')->group(function () {
-    Route::get('dashboard', function () {
-        return view('petugas.dashboard');
-    })->name('petugas.dashboard');
-    
-    Route::get('pengaduan', [PengaduanController::class, 'indexPetugas'])->name('petugas.pengaduan.index');
-    Route::patch('pengaduan/{pengaduan}/status', [PengaduanController::class, 'updateStatus'])->name('pengaduan.updateStatus');
-    Route::post('tanggapan/{pengaduan}', [TanggapanController::class, 'store'])->name('tanggapan.store');
-});
+    Route::get('/dashboard', function () {
+        return view('dashboard.petugas');
+    })->name('dashboard.petugas');
 
-// Public Route for viewing complaints
-Route::get('pengaduan/{pengaduan}', [PengaduanController::class, 'show'])->name('pengaduan.show');
-
-Route::get('/login-masyarakat', function () {
-    return redirect()->route('login.masyarakat');
+    Route::get('/pengaduan', [PengaduanController::class, 'indexPetugas'])->name('petugas.pengaduan.index');
+    Route::patch('/pengaduan/{pengaduan}/status', [PengaduanController::class, 'updateStatus'])->name('petugas.pengaduan.updateStatus');
+    Route::post('/tanggapan/{pengaduan}', [TanggapanController::class, 'store'])->name('petugas.tanggapan.store');
 });

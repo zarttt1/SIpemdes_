@@ -91,7 +91,9 @@
                 <div class="mt-3 text-center">
                     <p class="text-muted mb-0">
                         Sudah memiliki akun? 
-                        <a href="{{ route('login.masyarakat') }}" style="color: var(--primary-blue); font-weight: 600;">Login di sini</a>
+                        <a href="{{ route('login') }}" style="color: var(--primary-blue); font-weight: 600;">
+                            Login di sini
+                        </a>
                     </p>
                 </div>
             </div>

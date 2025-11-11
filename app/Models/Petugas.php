@@ -11,6 +11,9 @@ class Petugas extends Authenticatable
     use HasFactory, Notifiable;
 
     protected $table = 'petugas';
+    protected $primaryKey = 'id_petugas'; // penting: ubah dari 'id' ke 'id_petugas'
+    public $incrementing = false;         // karena tidak auto increment
+    protected $keyType = 'int';           // tipe data bigint = integer
 
     protected $fillable = [
         'nama',
@@ -19,6 +22,7 @@ class Petugas extends Authenticatable
         'password',
         'level',
         'status',
+        'remember_token', // tambahkan ini juga karena tabel punya kolom ini
     ];
 
     protected $hidden = [
