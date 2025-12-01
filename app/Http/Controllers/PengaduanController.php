@@ -10,8 +10,12 @@ use Illuminate\Support\Facades\Storage;
 class PengaduanController extends Controller
 {
     /**
-     * Menampilkan daftar pengaduan masyarakat yang sedang login
+     * ========================
+     * MASYARAKAT (USER)
+     * ========================
      */
+
+    // Menampilkan daftar pengaduan milik masyarakat
     public function index()
     {
         $id = Auth::user()->id_masyarakat ?? null;
@@ -27,21 +31,15 @@ class PengaduanController extends Controller
         return view('masyarakat.pengaduan.index', compact('pengaduan'));
     }
 
-    /**
-     * Menampilkan form untuk membuat pengaduan baru
-     */
     public function create()
     {
         return view('masyarakat.pengaduan.create');
     }
 
-    /**
-     * Menyimpan pengaduan baru ke database
-     */
     public function store(Request $request)
     {
         $request->validate([
-            'isi_laporan' => 'required|string', // tidak dibatasi panjang
+            'isi_laporan' => 'required|string',
             'foto' => 'nullable|image|max:2048',
         ]);
 
@@ -54,15 +52,12 @@ class PengaduanController extends Controller
             'tanggal_pengaduan' => now(),
             'isi_laporan' => $request->isi_laporan,
             'foto' => $fotoPath,
-            'status' => 'menunggu', // gunakan nilai valid di database
+            'status' => 'menunggu',
         ]);
 
         return redirect()->route('pengaduan.index')->with('success', 'Pengaduan berhasil dikirim!');
     }
 
-    /**
-     * Menampilkan detail satu pengaduan
-     */
     public function show($id)
     {
         $pengaduan = Pengaduan::where('id_pengaduan', $id)
@@ -72,9 +67,6 @@ class PengaduanController extends Controller
         return view('masyarakat.pengaduan.show', compact('pengaduan'));
     }
 
-    /**
-     * Menampilkan form edit pengaduan
-     */
     public function edit($id)
     {
         $pengaduan = Pengaduan::where('id_pengaduan', $id)
@@ -84,9 +76,6 @@ class PengaduanController extends Controller
         return view('masyarakat.pengaduan.edit', compact('pengaduan'));
     }
 
-    /**
-     * Memperbarui data pengaduan
-     */
     public function update(Request $request, $id)
     {
         $pengaduan = Pengaduan::where('id_pengaduan', $id)
@@ -94,15 +83,15 @@ class PengaduanController extends Controller
             ->firstOrFail();
 
         $request->validate([
-            'isi_laporan' => 'required|string', // hapus batas max:255
+            'isi_laporan' => 'required|string',
             'foto' => 'nullable|image|max:2048',
         ]);
 
-        // Hapus foto lama jika diganti
         if ($request->hasFile('foto')) {
             if ($pengaduan->foto && Storage::disk('public')->exists($pengaduan->foto)) {
                 Storage::disk('public')->delete($pengaduan->foto);
             }
+
             $pengaduan->foto = $request->file('foto')->store('pengaduan', 'public');
         }
 
@@ -113,9 +102,6 @@ class PengaduanController extends Controller
             ->with('success', 'Pengaduan berhasil diperbarui!');
     }
 
-    /**
-     * Menghapus pengaduan
-     */
     public function destroy($id)
     {
         $pengaduan = Pengaduan::where('id_pengaduan', $id)
@@ -129,5 +115,60 @@ class PengaduanController extends Controller
         $pengaduan->delete();
 
         return redirect()->route('pengaduan.index')->with('success', 'Pengaduan berhasil dihapus.');
+    }
+
+
+
+    /**
+     * ========================
+     * PETUGAS / ADMIN
+     * ========================
+     */
+
+    // Menampilkan semua pengaduan untuk petugas
+    public function indexPetugas()
+    {
+        // Data statistik
+        $totalPengaduan = Pengaduan::count();
+        $pengaduanBaru = Pengaduan::where('status', 'menunggu')->count();
+        $diproses = Pengaduan::where('status', 'proses')->count();
+        $selesai = Pengaduan::where('status', 'selesai')->count();
+
+        // Data tabel
+        $pengaduan = Pengaduan::with('masyarakat')
+                    ->orderBy('created_at', 'desc')
+                    ->get();
+
+        return view('dashboard.petugas', compact(
+            'pengaduan',
+            'totalPengaduan',
+            'pengaduanBaru',
+            'diproses',
+            'selesai'
+        ));
+    }
+
+    // 🔥 MENAMPILKAN DETAIL PENGADUAN UNTUK PETUGAS
+    public function showPetugas($id)
+    {
+        $pengaduan = Pengaduan::with('masyarakat', 'tanggapan')
+                    ->where('id_pengaduan', $id)
+                    ->firstOrFail();
+
+        return view('petugas.pengaduan.show', compact('pengaduan'));
+    }
+
+    // Petugas update status
+    public function updateStatus(Request $request, Pengaduan $pengaduan)
+    {
+        $request->validate([
+            'status' => 'required|in:menunggu,proses,selesai',
+        ]);
+
+        $pengaduan->update([
+            'status' => $request->status
+        ]);
+
+        return redirect()->back()->with('success', 'Status pengaduan berhasil diperbarui!');
     }
 }
