@@ -22,12 +22,12 @@
 
     {{-- Tampilkan error validasi --}}
     @if ($errors->any())
-      <div class="mb-4 text-red-600 text-sm">
+      <div class="mb-4 bg-red-50 border border-red-200 text-red-600 text-sm p-3 rounded-lg">
         {{ $errors->first() }}
       </div>
     @endif
 
-    {{-- Pastikan route dan method sesuai --}}
+    {{-- Form Login Biasa --}}
     <form method="POST" action="{{ route('login.process') }}" class="space-y-4">
       @csrf
 
@@ -51,7 +51,27 @@
       </button>
     </form>
 
-    <p class="text-center text-sm text-[#7096D1] mt-4">
+    {{-- Divider --}}
+    <div class="relative flex py-5 items-center">
+        <div class="flex-grow border-t border-[#7096D1]/30"></div>
+        <span class="flex-shrink-0 mx-4 text-[#7096D1] text-sm">Atau masuk dengan</span>
+        <div class="flex-grow border-t border-[#7096D1]/30"></div>
+    </div>
+
+    {{-- Tombol Login Google --}}
+    {{-- Pastikan route 'auth.google' sudah dibuat di web.php --}}
+    <a href="{{ route('auth.google') }}" 
+       class="w-full flex items-center justify-center gap-2 bg-white border border-[#7096D1]/50 text-[#334EAC] font-medium py-2 rounded-lg hover:bg-gray-50 transition-all shadow-sm">
+        <svg class="w-5 h-5" viewBox="0 0 24 24">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.84z" fill="#FBBC05"/>
+            <path d="M12 4.63c1.69 0 3.26.58 4.54 1.8l3.41-3.41C17.9 1.15 15.2 0 12 0 7.7 0 3.99 2.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        Google
+    </a>
+
+    <p class="text-center text-sm text-[#7096D1] mt-6">
       Belum punya akun?
       <a href="{{ route('register.masyarakat') }}" class="font-semibold text-[#334EAC] hover:underline">
         Daftar Masyarakat
