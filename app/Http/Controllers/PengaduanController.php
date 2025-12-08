@@ -2,22 +2,23 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Pengaduan;
-<<<<<<< HEAD
-use App\Http\Requests\StorePengaduanRequest;
-=======
-use App\Models\Tanggapan;
 use Illuminate\Http\Request;
->>>>>>> 5739e6f1e01310efbbc53dda653e2eabca4fc289
+use App\Models\Pengaduan;
+use App\Models\Tanggapan; // <--- PENTING: Jangan lupa import model ini
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class PengaduanController extends Controller
 {
-    // Masyarakat - Lihat daftar pengaduan
+    /**
+     * ========================
+     * MASYARAKAT (USER)
+     * ========================
+     */
+
+    // Menampilkan daftar pengaduan milik masyarakat
     public function index()
     {
-<<<<<<< HEAD
         try {
             $id = Auth::user()->id_masyarakat ?? null;
 
@@ -26,6 +27,7 @@ class PengaduanController extends Controller
             }
 
             $pengaduan = Pengaduan::where('id_masyarakat', $id)
+                ->with('tanggapan.petugas') // Load relasi untuk notifikasi
                 ->orderBy('created_at', 'desc')
                 ->paginate(10);
 
@@ -33,24 +35,24 @@ class PengaduanController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
-=======
-        $pengaduan = Pengaduan::where('id_masyarakat', Auth::guard('web')->id())
-            ->latest('tanggal_pengaduan')
-            ->paginate(10);
-
-        return view('masyarakat.pengaduan.index', compact('pengaduan'));
->>>>>>> 5739e6f1e01310efbbc53dda653e2eabca4fc289
     }
 
-    // Masyarakat - Form buat pengaduan
     public function create()
     {
         return view('masyarakat.pengaduan.create');
     }
 
-<<<<<<< HEAD
-    public function store(StorePengaduanRequest $request)
+    public function store(Request $request)
     {
+        $request->validate([
+            'isi_laporan' => 'required|string',
+            'foto' => 'nullable|image|max:2048|mimes:jpg,jpeg,png',
+        ], [
+            'isi_laporan.required' => 'Isi laporan tidak boleh kosong.',
+            'foto.image' => 'File yang diupload harus berupa gambar.',
+            'foto.max' => 'Ukuran foto maksimal 2MB.',
+        ]);
+
         try {
             $fotoPath = $request->hasFile('foto')
                 ? $request->file('foto')->store('pengaduan', 'public')
@@ -70,36 +72,10 @@ class PengaduanController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal mengirim pengaduan: ' . $e->getMessage())->withInput();
         }
-=======
-    // Masyarakat - Simpan pengaduan
-    public function store(Request $request)
-    {
-        $request->validate([
-            'isi_laporan' => 'required|string',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
-
-        $pengaduan = new Pengaduan();
-        $pengaduan->id_masyarakat = Auth::guard('web')->id();
-        $pengaduan->tanggal_pengaduan = now();
-        $pengaduan->isi_laporan = $request->isi_laporan;
-
-        if ($request->hasFile('foto')) {
-            $pengaduan->foto = $request->file('foto')->store('pengaduan', 'public');
-        }
-
-        $pengaduan->status = 'baru';
-        $pengaduan->save();
-
-        return redirect()->route('pengaduan.show', $pengaduan->id)
-            ->with('success', 'Pengaduan berhasil dibuat!');
->>>>>>> 5739e6f1e01310efbbc53dda653e2eabca4fc289
     }
 
-    // Masyarakat & Petugas - Lihat detail pengaduan
-    public function show(Pengaduan $pengaduan)
+    public function show($id)
     {
-<<<<<<< HEAD
         try {
             $pengaduan = Pengaduan::where('id_pengaduan', $id)
                 ->where('id_masyarakat', Auth::user()->id_masyarakat)
@@ -110,41 +86,29 @@ class PengaduanController extends Controller
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return $this->handleNotFound('Pengaduan');
         }
-=======
-        // Cek otorisasi
-        if (Auth::guard('web')->check()) {
-            if (Auth::guard('web')->id() !== $pengaduan->id_masyarakat) {
-                abort(403);
-            }
-        } elseif (!Auth::guard('petugas')->check()) {
-            abort(401);
-        }
-
-        $tanggapan = $pengaduan->tanggapan()->latest()->get();
-
-        return view('pengaduan.show', compact('pengaduan', 'tanggapan'));
->>>>>>> 5739e6f1e01310efbbc53dda653e2eabca4fc289
     }
 
-    public function edit(Pengaduan $pengaduan)
+    // === [MASYARAKAT] PAGE RIWAYAT TANGGAPAN ===
+    public function showTanggapan($id)
     {
-<<<<<<< HEAD
+        try {
+            $pengaduan = Pengaduan::where('id_pengaduan', $id)
+                ->where('id_masyarakat', Auth::user()->id_masyarakat)
+                ->with(['tanggapan.petugas'])
+                ->firstOrFail();
+
+            return view('masyarakat.pengaduan.tanggapan', compact('pengaduan'));
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return $this->handleNotFound('Pengaduan');
+        }
+    }
+
+    public function edit($id)
+    {
         try {
             $pengaduan = Pengaduan::where('id_pengaduan', $id)
                 ->where('id_masyarakat', Auth::user()->id_masyarakat)
                 ->firstOrFail();
-=======
-        // Ensure user owns this pengaduan
-        if (Auth::guard('web')->id() !== $pengaduan->id_masyarakat) {
-            abort(403);
-        }
-
-        // Only allow editing if status is 'baru'
-        if ($pengaduan->status !== 'baru') {
-            return redirect()->route('pengaduan.show', $pengaduan->id)
-                ->with('error', 'Pengaduan yang sudah diproses tidak dapat diedit.');
-        }
->>>>>>> 5739e6f1e01310efbbc53dda653e2eabca4fc289
 
             return view('masyarakat.pengaduan.edit', compact('pengaduan'));
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
@@ -152,9 +116,13 @@ class PengaduanController extends Controller
         }
     }
 
-<<<<<<< HEAD
-    public function update(StorePengaduanRequest $request, $id)
+    public function update(Request $request, $id)
     {
+        $request->validate([
+            'isi_laporan' => 'required|string',
+            'foto' => 'nullable|image|max:2048|mimes:jpg,jpeg,png',
+        ]);
+
         try {
             $pengaduan = Pengaduan::where('id_pengaduan', $id)
                 ->where('id_masyarakat', Auth::user()->id_masyarakat)
@@ -181,45 +149,10 @@ class PengaduanController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal memperbarui pengaduan: ' . $e->getMessage())->withInput();
         }
-=======
-    public function update(Request $request, Pengaduan $pengaduan)
-    {
-        // Ensure user owns this pengaduan
-        if (Auth::guard('web')->id() !== $pengaduan->id_masyarakat) {
-            abort(403);
-        }
-
-        // Only allow updating if status is 'baru'
-        if ($pengaduan->status !== 'baru') {
-            return redirect()->route('pengaduan.show', $pengaduan->id)
-                ->with('error', 'Pengaduan yang sudah diproses tidak dapat diedit.');
-        }
-
-        $request->validate([
-            'isi_laporan' => 'required|string',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
-
-        $pengaduan->isi_laporan = $request->isi_laporan;
-
-        if ($request->hasFile('foto')) {
-            // Delete old photo if exists
-            if ($pengaduan->foto) {
-                Storage::disk('public')->delete($pengaduan->foto);
-            }
-            $pengaduan->foto = $request->file('foto')->store('pengaduan', 'public');
-        }
-
-        $pengaduan->save();
-
-        return redirect()->route('pengaduan.show', $pengaduan->id)
-            ->with('success', 'Pengaduan berhasil diperbarui!');
->>>>>>> 5739e6f1e01310efbbc53dda653e2eabca4fc289
     }
 
-    public function destroy(Pengaduan $pengaduan)
+    public function destroy($id)
     {
-<<<<<<< HEAD
         try {
             $pengaduan = Pengaduan::where('id_pengaduan', $id)
                 ->where('id_masyarakat', Auth::user()->id_masyarakat)
@@ -255,8 +188,8 @@ class PengaduanController extends Controller
             $selesai = Pengaduan::where('status', 'selesai')->count();
 
             $pengaduan = Pengaduan::with('masyarakat')
-                        ->orderBy('created_at', 'desc')
-                        ->paginate(10);
+                ->orderBy('created_at', 'desc')
+                ->paginate(10);
 
             return view('dashboard.petugas', compact(
                 'pengaduan',
@@ -274,8 +207,8 @@ class PengaduanController extends Controller
     {
         try {
             $pengaduan = Pengaduan::where('id_pengaduan', $id)
-                        ->with('masyarakat', 'tanggapan.petugas')
-                        ->firstOrFail();
+                ->with('masyarakat', 'tanggapan.petugas')
+                ->firstOrFail();
 
             return view('petugas.pengaduan.show', compact('pengaduan'));
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
@@ -283,26 +216,57 @@ class PengaduanController extends Controller
         }
     }
 
+    // === [PETUGAS] PAGE KHUSUS BERI TANGGAPAN ===
+    public function createTanggapan($id)
+    {
+        try {
+            $pengaduan = Pengaduan::where('id_pengaduan', $id)
+                ->with(['masyarakat', 'tanggapan.petugas'])
+                ->firstOrFail();
+
+            return view('petugas.pengaduan.tanggapan', compact('pengaduan'));
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return $this->handleNotFound('Pengaduan');
+        }
+    }
+
+    // === [PETUGAS] UPDATE STATUS & KIRIM TANGGAPAN ===
     public function updateStatus(Request $request, Pengaduan $pengaduan)
     {
         try {
             $request->validate([
                 'status' => 'required|in:menunggu,proses,selesai',
+                'isi_tanggapan' => 'required|string', // Validasi input tanggapan wajib diisi
             ]);
 
             $oldStatus = $pengaduan->status;
+            
+            // 1. Update Status
             $pengaduan->update(['status' => $request->status]);
 
-            $this->logAction('update', 'Pengaduan', $pengaduan->id_pengaduan, 
-                ['status' => $oldStatus], 
-                ['status' => $request->status]
+            // 2. Simpan Tanggapan
+            Tanggapan::create([
+                'id_pengaduan' => $pengaduan->id_pengaduan,
+                'id_petugas'   => Auth::guard('petugas')->user()->id_petugas, // Pastikan guard 'petugas' benar
+                'tanggal_tanggapan' => now(),
+                'isi_tanggapan' => $request->isi_tanggapan,
+            ]);
+
+            // 3. Log Action
+            $this->logAction('update', 'Pengaduan', $pengaduan->id_pengaduan,
+                ['status' => $oldStatus],
+                ['status' => $request->status, 'tanggapan' => 'Ditambahkan']
             );
 
-            return redirect()->back()->with('success', 'Status pengaduan berhasil diperbarui!');
+            // Redirect kembali ke halaman beri tanggapan agar bisa lihat hasil
+            return redirect()->route('petugas.pengaduan.tanggapan', $pengaduan->id_pengaduan)
+                ->with('success', 'Status diperbarui dan tanggapan berhasil dikirim!');
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal memperbarui status: ' . $e->getMessage());
         }
     }
+
+    // === ADMIN SECTION ===
 
     public function indexAdmin()
     {
@@ -310,7 +274,7 @@ class PengaduanController extends Controller
             $pengaduan = Pengaduan::with('masyarakat')
                 ->latest()
                 ->paginate(10);
-            
+
             return view('admin.pengaduan.index', compact('pengaduan'));
         } catch (\Exception $e) {
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
@@ -396,49 +360,5 @@ class PengaduanController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal menghapus pengaduan: ' . $e->getMessage());
         }
-=======
-        // Ensure user owns this pengaduan
-        if (Auth::guard('web')->id() !== $pengaduan->id_masyarakat) {
-            abort(403);
-        }
-
-        // Only allow deleting if status is 'baru'
-        if ($pengaduan->status !== 'baru') {
-            return redirect()->route('masyarakat.pengaduan.index')
-                ->with('error', 'Pengaduan yang sudah diproses tidak dapat dihapus.');
-        }
-
-        // Delete photo if exists
-        if ($pengaduan->foto) {
-            Storage::disk('public')->delete($pengaduan->foto);
-        }
-
-        $pengaduan->delete();
-
-        return redirect()->route('masyarakat.pengaduan.index')
-            ->with('success', 'Pengaduan berhasil dihapus!');
-    }
-
-    // Petugas - Daftar pengaduan
-    public function indexPetugas()
-    {
-        $pengaduan = Pengaduan::with('masyarakat')
-            ->latest('tanggal_pengaduan')
-            ->paginate(20);
-
-        return view('petugas.pengaduan.index', compact('pengaduan'));
-    }
-
-    // Petugas - Update status pengaduan
-    public function updateStatus(Request $request, Pengaduan $pengaduan)
-    {
-        $request->validate([
-            'status' => 'required|in:baru,diproses,selesai',
-        ]);
-
-        $pengaduan->update(['status' => $request->status]);
-
-        return back()->with('success', 'Status pengaduan berhasil diperbarui!');
->>>>>>> 5739e6f1e01310efbbc53dda653e2eabca4fc289
     }
 }
