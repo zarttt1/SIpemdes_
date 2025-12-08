@@ -11,9 +11,12 @@ class Pengaduan extends Model
     use HasFactory, Auditable;
 
     protected $table = 'pengaduan';
+<<<<<<< HEAD
     protected $primaryKey = 'id_pengaduan';
     public $keyType = 'int';
     public $incrementing = true;
+=======
+>>>>>>> 5739e6f1e01310efbbc53dda653e2eabca4fc289
 
     protected $fillable = [
         'id_masyarakat',
@@ -23,7 +26,16 @@ class Pengaduan extends Model
         'status',
     ];
 
+<<<<<<< HEAD
     protected $dates = ['tanggal_pengaduan', 'created_at', 'updated_at'];
+=======
+    protected function casts(): array
+    {
+        return [
+            'tanggal_pengaduan' => 'datetime',
+        ];
+    }
+>>>>>>> 5739e6f1e01310efbbc53dda653e2eabca4fc289
 
     public function masyarakat()
     {
