@@ -7,8 +7,8 @@ use App\Models\Petugas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Laravel\Socialite\Facades\Socialite; // Tambahan untuk Socialite
-use Illuminate\Support\Str; // Tambahan untuk helper string
+use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -19,6 +19,17 @@ class AuthController extends Controller
      */
     public function showLogin()
     {
+        // Cek jika masyarakat sudah login
+        if (Auth::guard('web')->check()) {
+            return redirect()->route('dashboard.masyarakat');
+        }
+
+        // Cek jika petugas sudah login
+        if (Auth::guard('petugas')->check()) {
+            return redirect()->route('dashboard.petugas');
+        }
+
+        // Jika belum login, tampilkan form login
         return view('auth.login');
     }
 
@@ -64,37 +75,27 @@ class AuthController extends Controller
     public function handleGoogleCallback()
     {
         try {
-            // Ambil data user dari Google
             $googleUser = Socialite::driver('google')->user();
 
-            // Cek apakah email sudah terdaftar di tabel masyarakat
             $user = Masyarakat::where('email', $googleUser->getEmail())->first();
 
             if (!$user) {
-                // === SKENARIO REGISTER BARU VIA GOOGLE ===
-                // Karena NIK, Alamat, dll wajib di database, kita isi data dummy dulu.
-                // User sebaiknya diarahkan ke halaman "Lengkapi Profil" nanti.
-                
                 $user = Masyarakat::create([
-                    // Generate NIK dummy 16 digit (agar tidak error database)
-                    'nik' => str_pad(mt_rand(1, 9999999999999999), 16, '0', STR_PAD_LEFT), 
+                    'nik' => str_pad(mt_rand(1, 9999999999999999), 16, '0', STR_PAD_LEFT),
                     'nama' => $googleUser->getName(),
-                    'username' => Str::slug($googleUser->getName()) . rand(1000, 9999), // Username unik
+                    'username' => Str::slug($googleUser->getName()) . rand(1000, 9999),
                     'email' => $googleUser->getEmail(),
-                    'password' => Hash::make(Str::random(16)), // Password acak yang kuat
-                    'no_hp' => '080000000000', // Dummy No HP
+                    'password' => Hash::make(Str::random(16)),
+                    'no_hp' => '080000000000',
                     'alamat' => 'Alamat belum diisi (Login via Google)',
                     'google_id' => $googleUser->getId(),
                 ]);
             } else {
-                // === SKENARIO USER LAMA ===
-                // Jika user sudah ada tapi belum ada google_id, kita update
                 if (!$user->google_id) {
                     $user->update(['google_id' => $googleUser->getId()]);
                 }
             }
 
-            // Login user tersebut
             Auth::guard('web')->login($user);
             return redirect()->route('dashboard.masyarakat');
 

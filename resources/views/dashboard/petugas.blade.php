@@ -245,7 +245,7 @@
                     <tbody>
                         @forelse ($pengaduan ?? [] as $item)
                         <tr>
-                            <td class="text-center fw-bold text-secondary">#{{ $item->id_pengaduan }}</td>
+                            <td class="text-center fw-bold text-secondary">{{ $item->id_pengaduan }}</td>
 
                             <td>
                                 <div class="fw-bold">{{ $item->masyarakat->nama ?? 'User Terhapus' }}</div>
