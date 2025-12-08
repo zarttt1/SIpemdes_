@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Traits\Auditable;
 
 class Masyarakat extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, Auditable;
 
     protected $table = 'masyarakat';
     protected $primaryKey = 'id_masyarakat';

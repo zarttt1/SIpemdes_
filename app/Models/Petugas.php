@@ -5,15 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Traits\Auditable;
 
 class Petugas extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, Auditable;
 
     protected $table = 'petugas';
-    protected $primaryKey = 'id_petugas'; // penting: ubah dari 'id' ke 'id_petugas'
-    public $incrementing = false;         // karena tidak auto increment
-    protected $keyType = 'int';           // tipe data bigint = integer
+    protected $primaryKey = 'id_petugas';
+    public $incrementing = true;
+    protected $keyType = 'int';
 
     protected $fillable = [
         'nama',
@@ -22,7 +23,7 @@ class Petugas extends Authenticatable
         'password',
         'level',
         'status',
-        'remember_token', // tambahkan ini juga karena tabel punya kolom ini
+        'remember_token',
     ];
 
     protected $hidden = [
@@ -39,6 +40,6 @@ class Petugas extends Authenticatable
 
     public function tanggapan()
     {
-        return $this->hasMany(Tanggapan::class, 'id_petugas');
+        return $this->hasMany(Tanggapan::class, 'id_petugas', 'id_petugas');
     }
 }
