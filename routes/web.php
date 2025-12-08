@@ -24,15 +24,19 @@ Route::get('/', function () {
 */
 Route::prefix('auth')->group(function () {
 
-    // Login
+    // 1. Login Konvensional (Username & Password)
     Route::get('login', [AuthController::class, 'showLogin'])->name('login');
     Route::post('login', [AuthController::class, 'processLogin'])->name('login.process');
 
-    // Register masyarakat
+    // 2. Login Google (OAUTH)
+    Route::get('google', [AuthController::class, 'redirectToGoogle'])->name('auth.google');
+    Route::get('google/callback', [AuthController::class, 'handleGoogleCallback'])->name('auth.google.callback');
+
+    // 3. Register masyarakat
     Route::get('register-masyarakat', [AuthController::class, 'showMasyarakatRegister'])->name('register.masyarakat');
     Route::post('register-masyarakat', [AuthController::class, 'registerMasyarakat'])->name('register.masyarakat.store');
 
-    // Logout
+    // 4. Logout
     Route::post('logout', [AuthController::class, 'logout'])->name('logout');
 });
 
@@ -42,11 +46,14 @@ Route::prefix('auth')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth:web'])->prefix('masyarakat')->group(function () {
-
     Route::get('/dashboard', [MasyarakatController::class, 'dashboard'])->name('dashboard.masyarakat');
 
-    // CRUD pengaduan masyarakat
+    // CRUD Pengaduan (Resource)
     Route::resource('pengaduan', PengaduanController::class);
+
+    // FITUR BARU: Lihat Riwayat Tanggapan (Chat Style)
+    Route::get('/pengaduan/{id}/tanggapan', [PengaduanController::class, 'showTanggapan'])
+        ->name('pengaduan.tanggapan');
 });
 
 /*
@@ -56,26 +63,26 @@ Route::middleware(['auth:web'])->prefix('masyarakat')->group(function () {
 */
 Route::middleware(['auth:petugas', 'petugas.active'])->prefix('petugas')->group(function () {
 
-    // Dashboard petugas (list pengaduan)
-    Route::get('/dashboard', [PengaduanController::class, 'indexPetugas'])
-        ->name('dashboard.petugas');
+    // Dashboard petugas
+    Route::get('/dashboard', [PengaduanController::class, 'indexPetugas'])->name('dashboard.petugas');
 
     // List pengaduan
-    Route::get('/pengaduan', [PengaduanController::class, 'indexPetugas'])
-        ->name('petugas.pengaduan.index');
+    Route::get('/pengaduan', [PengaduanController::class, 'indexPetugas'])->name('petugas.pengaduan.index');
 
-    // DETAIL pengaduan petugas (WAJIB di atas updateStatus biar tidak bentrok)
-    Route::get('/pengaduan/show/{pengaduan}', [PengaduanController::class, 'showPetugas'])
-        ->name('petugas.pengaduan.show');
+    // Detail Pengaduan (Read Only)
+    Route::get('/pengaduan/{id}', [PengaduanController::class, 'showPetugas'])->name('petugas.pengaduan.show');
 
-    // Update status pengaduan
-    Route::patch('/pengaduan/{pengaduan}/status', [PengaduanController::class, 'updateStatus'])
-        ->name('petugas.pengaduan.updateStatus');
+    // === FITUR BARU: Page Khusus Beri Tanggapan ===
+    Route::get('/pengaduan/{id}/tanggapan', [PengaduanController::class, 'createTanggapan'])
+        ->name('petugas.pengaduan.tanggapan');
 
-    // Tanggapan petugas
-    Route::post('/tanggapan/{pengaduan}', [TanggapanController::class, 'store'])
-        ->name('petugas.tanggapan.store');
+    // Aksi Update Status & Kirim Tanggapan
+    Route::patch('/pengaduan/{pengaduan}/status', [PengaduanController::class, 'updateStatus'])->name('petugas.pengaduan.updateStatus');
+    
+    // (Opsional) Route khusus store tanggapan jika dipisah
+    Route::post('/tanggapan/{pengaduan}', [TanggapanController::class, 'store'])->name('petugas.tanggapan.store');
 
+    // Profile & Laporan
     Route::get('/profile', [PetugasController::class, 'profile'])->name('petugas.profile');
     Route::get('/profile/edit', [PetugasController::class, 'editProfile'])->name('petugas.profile.edit');
     Route::put('/profile', [PetugasController::class, 'updateProfile'])->name('petugas.profile.update');
@@ -117,9 +124,10 @@ Route::middleware(['auth:petugas', 'petugas.active', 'admin.level'])->prefix('ad
     Route::put('/petugas/{id}', [AdminController::class, 'updatePetugas'])->name('admin.petugas.update');
     Route::delete('/petugas/{id}', [AdminController::class, 'destroyPetugas'])->name('admin.petugas.destroy');
 
-    // ========== TANGGAPAN ==========
+    // ========== TANGGAPAN (HAPUS/EDIT OLEH ADMIN) ==========
     Route::get('/tanggapan', [AdminController::class, 'indexTanggapan'])->name('admin.tanggapan.index');
     Route::get('/tanggapan/{id}', [AdminController::class, 'showTanggapan'])->name('admin.tanggapan.show');
+    
     Route::get('/tanggapan/{id}/edit', [TanggapanController::class, 'edit'])->name('admin.tanggapan.edit');
     Route::put('/tanggapan/{id}', [TanggapanController::class, 'update'])->name('admin.tanggapan.update');
     Route::delete('/tanggapan/{id}', [AdminController::class, 'destroyTanggapan'])->name('admin.tanggapan.destroy');
