@@ -15,7 +15,7 @@ return new class extends Migration
             $table->text('isi_laporan');
             $table->string('foto');
             
-            $table->enum('status', ['menunggu', 'diproses', 'selesai'])->default('menunggu');
+            $table->enum('status', ['menunggu', 'proses', 'selesai'])->default('menunggu');
             $table->timestamps();
 
             $table->foreign('id_masyarakat')
