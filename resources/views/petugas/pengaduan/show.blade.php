@@ -21,7 +21,7 @@
 
             <div class="card shadow border-0 mb-4">
                 <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Detail Pengaduan #{{ $pengaduan->id_pengaduan }}</h5>
+                    <h5 class="mb-0">Detail Pengaduan {{ $pengaduan->id_pengaduan }}</h5>
                     <span class="badge bg-light text-primary">
                         {{ \Carbon\Carbon::parse($pengaduan->tanggal_pengaduan)->translatedFormat('d F Y') }}
                     </span>
