@@ -15,7 +15,6 @@ class TanggapanController extends Controller
      */
     public function index()
     {
-<<<<<<< HEAD
         try {
             $tanggapan = Tanggapan::with('pengaduan', 'petugas')
                 ->latest()
@@ -24,22 +23,6 @@ class TanggapanController extends Controller
             return view('admin.tanggapan.index', compact('tanggapan'));
         } catch (\Exception $e) {
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
-=======
-        $request->validate([
-            'isi_tanggapan' => 'required|string',
-        ]);
-
-        Tanggapan::create([
-            'id_pengaduan' => $pengaduan->id,
-            'id_petugas' => Auth::guard('petugas')->id(),
-            'tanggal_tanggapan' => now(),
-            'isi_tanggapan' => $request->isi_tanggapan,
-        ]);
-
-        // Update status pengaduan menjadi diproses jika masih baru
-        if ($pengaduan->status === 'baru') {
-            $pengaduan->update(['status' => 'diproses']);
->>>>>>> 5739e6f1e01310efbbc53dda653e2eabca4fc289
         }
     }
 
@@ -129,55 +112,5 @@ class TanggapanController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal menghapus tanggapan: ' . $e->getMessage());
         }
-    }
-
-    public function edit(Tanggapan $tanggapan)
-    {
-        // Ensure petugas owns this tanggapan
-        if (Auth::guard('petugas')->id() !== $tanggapan->id_petugas) {
-            abort(403);
-        }
-
-        return view('petugas.tanggapan.edit', compact('tanggapan'));
-    }
-
-    public function update(Request $request, Tanggapan $tanggapan)
-    {
-        // Ensure petugas owns this tanggapan
-        if (Auth::guard('petugas')->id() !== $tanggapan->id_petugas) {
-            abort(403);
-        }
-
-        $request->validate([
-            'isi_tanggapan' => 'required|string',
-        ]);
-
-        $tanggapan->update([
-            'isi_tanggapan' => $request->isi_tanggapan,
-        ]);
-
-        return redirect()->route('pengaduan.show', $tanggapan->id_pengaduan)
-            ->with('success', 'Tanggapan berhasil diperbarui!');
-    }
-
-    public function destroy(Tanggapan $tanggapan)
-    {
-        // Ensure petugas owns this tanggapan or is admin
-        $petugas = Auth::guard('petugas')->user();
-        
-        if ($petugas->id !== $tanggapan->id_petugas && $petugas->level !== 'admin') {
-            abort(403);
-        }
-
-        $pengaduanId = $tanggapan->id_pengaduan;
-        $tanggapan->delete();
-
-        // Check if there are no more tanggapan, revert status to 'baru'
-        $pengaduan = Pengaduan::find($pengaduanId);
-        if ($pengaduan && $pengaduan->tanggapan()->count() === 0 && $pengaduan->status === 'diproses') {
-            $pengaduan->update(['status' => 'baru']);
-        }
-
-        return back()->with('success', 'Tanggapan berhasil dihapus!');
     }
 }
