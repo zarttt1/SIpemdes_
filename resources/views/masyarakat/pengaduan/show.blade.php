@@ -19,7 +19,7 @@
                 {{-- HEADER CARD --}}
                 <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
                     <h5 class="mb-0 fw-bold text-primary">
-                        #{{ $pengaduan->id_pengaduan }} - Detail Pengaduan
+                        {{ $pengaduan->id_pengaduan }} - Detail Pengaduan
                     </h5>
                     <span class="text-muted small">
                         Dilaporkan pada: {{ \Carbon\Carbon::parse($pengaduan->created_at)->translatedFormat('d F Y, H:i') }}
