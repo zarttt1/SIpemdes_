@@ -7,13 +7,109 @@ use App\Models\Petugas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Mail;
-use App\Mail\OtpMail;
-use Illuminate\Support\Str;
+use Laravel\Socialite\Facades\Socialite; // Tambahan untuk Socialite
+use Illuminate\Support\Str; // Tambahan untuk helper string
 
 class AuthController extends Controller
 {
-    // Masyarakat Registration
+    /**
+     * ======================
+     * LOGIN UMUM
+     * ======================
+     */
+    public function showLogin()
+    {
+        return view('auth.login');
+    }
+
+    public function processLogin(Request $request)
+    {
+        $request->validate([
+            'username' => 'required|string',
+            'password' => 'required|string',
+        ]);
+
+        // 🔹 1. Login masyarakat
+        $masyarakat = Masyarakat::where('username', $request->username)->first();
+        if ($masyarakat && Hash::check($request->password, $masyarakat->password)) {
+            Auth::guard('web')->login($masyarakat);
+            $request->session()->regenerate();
+            return redirect()->route('dashboard.masyarakat');
+        }
+
+        // 🔹 2. Login petugas
+        $petugas = Petugas::where('username', $request->username)->first();
+        if ($petugas && Hash::check($request->password, $petugas->password)) {
+            Auth::guard('petugas')->login($petugas);
+            $request->session()->regenerate();
+            return redirect()->route('dashboard.petugas');
+        }
+
+        // 🔹 3. Gagal login
+        return back()->withErrors([
+            'username' => 'Username atau password salah.',
+        ])->withInput();
+    }
+
+    /**
+     * ======================
+     * LOGIN GOOGLE (OAUTH)
+     * ======================
+     */
+    public function redirectToGoogle()
+    {
+        return Socialite::driver('google')->redirect();
+    }
+
+    public function handleGoogleCallback()
+    {
+        try {
+            // Ambil data user dari Google
+            $googleUser = Socialite::driver('google')->user();
+
+            // Cek apakah email sudah terdaftar di tabel masyarakat
+            $user = Masyarakat::where('email', $googleUser->getEmail())->first();
+
+            if (!$user) {
+                // === SKENARIO REGISTER BARU VIA GOOGLE ===
+                // Karena NIK, Alamat, dll wajib di database, kita isi data dummy dulu.
+                // User sebaiknya diarahkan ke halaman "Lengkapi Profil" nanti.
+                
+                $user = Masyarakat::create([
+                    // Generate NIK dummy 16 digit (agar tidak error database)
+                    'nik' => str_pad(mt_rand(1, 9999999999999999), 16, '0', STR_PAD_LEFT), 
+                    'nama' => $googleUser->getName(),
+                    'username' => Str::slug($googleUser->getName()) . rand(1000, 9999), // Username unik
+                    'email' => $googleUser->getEmail(),
+                    'password' => Hash::make(Str::random(16)), // Password acak yang kuat
+                    'no_hp' => '080000000000', // Dummy No HP
+                    'alamat' => 'Alamat belum diisi (Login via Google)',
+                    'google_id' => $googleUser->getId(),
+                ]);
+            } else {
+                // === SKENARIO USER LAMA ===
+                // Jika user sudah ada tapi belum ada google_id, kita update
+                if (!$user->google_id) {
+                    $user->update(['google_id' => $googleUser->getId()]);
+                }
+            }
+
+            // Login user tersebut
+            Auth::guard('web')->login($user);
+            return redirect()->route('dashboard.masyarakat');
+
+        } catch (\Exception $e) {
+            return redirect()->route('login')->withErrors([
+                'login' => 'Gagal login dengan Google: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * ======================
+     * REGISTER MASYARAKAT
+     * ======================
+     */
     public function showMasyarakatRegister()
     {
         return view('auth.register-masyarakat');
@@ -22,16 +118,16 @@ class AuthController extends Controller
     public function registerMasyarakat(Request $request)
     {
         $request->validate([
-            'nik' => 'required|unique:masyarakat,nik|digits:16',
+            'nik' => 'required|digits:16|unique:masyarakat,nik',
             'nama' => 'required|string|max:100',
             'alamat' => 'required|string',
             'no_hp' => 'required|string|max:15',
-            'username' => 'required|unique:masyarakat,username|string|max:50',
-            'email' => 'required|unique:masyarakat,email|email',
+            'username' => 'required|string|max:50|unique:masyarakat,username',
+            'email' => 'required|email|unique:masyarakat,email',
             'password' => 'required|min:8|confirmed',
         ]);
 
-        $masyarakat = Masyarakat::create([
+        Masyarakat::create([
             'nik' => $request->nik,
             'nama' => $request->nama,
             'alamat' => $request->alamat,
@@ -39,90 +135,28 @@ class AuthController extends Controller
             'username' => $request->username,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'verification_token' => Str::random(60),
         ]);
 
-        $otpCode = $masyarakat->generateOtp();
-        
-        try {
-            Mail::to($masyarakat->email)->send(new OtpMail($masyarakat, $otpCode));
-        } catch (\Exception $e) {
-            \Log::error('Failed to send OTP email: ' . $e->getMessage());
-        }
-
-        return redirect()->route('verification.otp')
-            ->with('success', 'Registrasi berhasil! Kode OTP telah dikirim ke email Anda.')
-            ->with('user_id', $masyarakat->id)
-            ->with('user_type', 'masyarakat');
+        return redirect()->route('login')
+            ->with('success', 'Registrasi berhasil! Silakan login.');
     }
 
-    // Masyarakat Login
-    public function showMasyarakatLogin()
-    {
-        return view('auth.login-masyarakat');
-    }
-
-    public function loginMasyarakat(Request $request)
-    {
-        $credentials = $request->validate([
-            'username' => 'required',
-            'password' => 'required',
-        ]);
-
-        if (Auth::guard('web')->attempt(['username' => $credentials['username'], 'password' => $credentials['password']])) {
-            $user = Auth::guard('web')->user();
-            
-            if (!$user->hasVerifiedEmail()) {
-                Auth::guard('web')->logout();
-                return redirect()->route('verification.notice')
-                    ->with('error', 'Silakan verifikasi email Anda terlebih dahulu.')
-                    ->with('user_id', $user->id)
-                    ->with('user_type', 'masyarakat');
-            }
-            
-            return redirect()->intended('/masyarakat/dashboard');
-        }
-
-        return back()->with('error', 'Username atau password salah.');
-    }
-
-    // Petugas Login
-    public function showPetugasLogin()
-    {
-        return view('auth.login-petugas');
-    }
-
-    public function loginPetugas(Request $request)
-    {
-        $credentials = $request->validate([
-            'username' => 'required',
-            'password' => 'required',
-        ]);
-
-        if (Auth::guard('petugas')->attempt(['username' => $credentials['username'], 'password' => $credentials['password']])) {
-            $user = Auth::guard('petugas')->user();
-            
-            if (!$user->hasVerifiedEmail()) {
-                Auth::guard('petugas')->logout();
-                return redirect()->route('verification.notice')
-                    ->with('error', 'Silakan verifikasi email Anda terlebih dahulu.')
-                    ->with('user_id', $user->id)
-                    ->with('user_type', 'petugas');
-            }
-            
-            return redirect()->intended('/petugas/dashboard');
-        }
-
-        return back()->with('error', 'Username atau password salah.');
-    }
-
-    // Logout
+    /**
+     * ======================
+     * LOGOUT
+     * ======================
+     */
     public function logout(Request $request)
     {
-        Auth::logout();
+        if (Auth::guard('petugas')->check()) {
+            Auth::guard('petugas')->logout();
+        } elseif (Auth::guard('web')->check()) {
+            Auth::guard('web')->logout();
+        }
+
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect()->route('login')->with('success', 'Anda telah logout.');
     }
 }
