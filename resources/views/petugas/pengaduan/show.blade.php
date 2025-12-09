@@ -7,7 +7,6 @@
 
             {{-- TITEL & TOMBOL AKSI --}}
             <div class="d-flex justify-content-between align-items-center mb-3">
-
                 <a href="{{ route('dashboard.petugas') }}" 
                    class="btn btn-light border shadow-sm btn-sm">
                     <i class="bi bi-arrow-left"></i> Kembali
@@ -24,7 +23,7 @@
             {{-- CARD DETAIL --}}
             <div class="card shadow-sm border-0 mb-4 rounded-3">
 
-                {{-- HEADER CARD --}}
+                {{-- HEADER CARD (VERSI TERBAIK, DIGABUNG) --}}
                 <div class="d-flex justify-content-between align-items-center p-3 rounded-top"
                      style="background: linear-gradient(90deg, #0099ff, #007ee6);">
 

@@ -23,14 +23,6 @@
         letter-spacing: .06em;
     }
 
-    .info-card {
-        background: #ffffff;
-        border-radius: 14px;
-        padding: 18px 20px;
-        border: 1px solid #e2e8f0;
-        box-shadow: 0 4px 15px rgba(0,0,0,.05);
-    }
-
     .info-box {
         background: #f8fafc;
         border-radius: 12px;
@@ -77,6 +69,7 @@
                 </a>
             </div>
 
+            {{-- CARD WRAPPER --}}
             <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
 
                 {{-- HEADER CARD --}}
@@ -86,14 +79,13 @@
                             Detail Pengaduan #{{ $pengaduan->id_pengaduan }}
                         </div>
                         <div class="meta-info mt-1">
-                            Dilaporkan pada: 
+                            Dilaporkan pada:
                             <strong>
                                 {{ \Carbon\Carbon::parse($pengaduan->created_at)->translatedFormat('d F Y, H:i') }}
                             </strong>
                         </div>
                     </div>
                 </div>
-
 
                 <div class="card-body p-4">
 
@@ -110,7 +102,6 @@
                         @endif
                     </div>
 
-
                     {{-- ISI LAPORAN --}}
                     <div class="mb-4">
                         <label class="section-label mb-2">Isi Laporan</label>
@@ -121,14 +112,13 @@
                         </div>
                     </div>
 
-
                     {{-- FOTO BUKTI --}}
                     <div class="mb-4">
                         <label class="section-label mb-2">Foto Bukti</label>
 
                         @if(!empty($pengaduan->foto))
-                            <img src="{{ asset('storage/' . $pengaduan->foto) }}" 
-                                 alt="Foto pengaduan" 
+                            <img src="{{ asset('storage/' . $pengaduan->foto) }}"
+                                 alt="Foto pengaduan"
                                  class="img-fluid img-preview">
                         @else
                             <div class="alert alert-secondary d-inline-flex align-items-center gap-2 px-3 py-2">
@@ -138,18 +128,17 @@
                         @endif
                     </div>
 
-
-                    {{-- TOMBOL AKSI --}}
+                    {{-- AKSI (EDIT / HAPUS) --}}
                     @if($pengaduan->status == 'menunggu')
                         <hr class="my-4">
                         <div class="d-flex justify-content-end gap-2">
 
-                            <a href="{{ route('pengaduan.edit', $pengaduan->id_pengaduan) }}" 
+                            <a href="{{ route('pengaduan.edit', $pengaduan->id_pengaduan) }}"
                                class="btn btn-warning text-dark shadow-sm">
                                 <i class="bi bi-pencil-square"></i> Edit
                             </a>
 
-                            <form action="{{ route('pengaduan.destroy', $pengaduan->id_pengaduan) }}" 
+                            <form action="{{ route('pengaduan.destroy', $pengaduan->id_pengaduan) }}"
                                   method="POST"
                                   onsubmit="return confirm('Apakah Anda yakin ingin menghapus pengaduan ini? Data tidak bisa dikembalikan.');">
                                 @csrf

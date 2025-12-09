@@ -262,6 +262,7 @@
 
         <div class="table-responsive">
             <table class="table mb-0">
+
                 <thead>
                     <tr>
                         <th class="text-center">ID</th>
@@ -299,10 +300,8 @@
                         <td class="text-center">
                             @if($item->status == 'menunggu')
                                 <span class="badge-status bg-wait">Menunggu</span>
-
                             @elseif($item->status == 'proses')
                                 <span class="badge-status bg-proc">Proses</span>
-
                             @else
                                 <span class="badge-status bg-done">Selesai</span>
                             @endif
@@ -340,6 +339,7 @@
                     </tr>
                     @endforelse
                 </tbody>
+
             </table>
         </div>
 
