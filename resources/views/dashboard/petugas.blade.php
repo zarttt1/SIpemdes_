@@ -3,319 +3,355 @@
 @section('title', 'Dashboard Petugas - SIPEMDES')
 
 @section('content')
+
 <style>
-    .dashboard-petugas {
-        background: #f8fafc;
-        padding: 2rem 1rem 3rem;
-        font-family: 'Poppins', sans-serif;
-        min-height: 100vh;
-        color: #1e293b;
-    }
+/* ----------------------------------------------------------
+   GLOBAL
+---------------------------------------------------------- */
+.dashboard-container {
+    background: linear-gradient(135deg, #eef3f9 0%, #f9fbff 50%, #eef2ff 100%);
+    padding: 2.8rem 1rem 4rem;
+    font-family: 'Poppins', sans-serif;
+    min-height: 100vh;
+}
 
-    /* Header */
-    .dashboard-header {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        justify-content: space-between;
-        gap: 1rem;
-        margin-bottom: 2rem;
-    }
+/* ----------------------------------------------------------
+   HEADER
+---------------------------------------------------------- */
+.dashboard-header {
+    margin-bottom: 2.8rem;
+    padding-left: 1.1rem;
+    border-left: 5px solid #2563eb;
+    background: #ffffffaa;
+    backdrop-filter: blur(6px);
+    padding: 1rem 1.2rem;
+    border-radius: 12px;
+    box-shadow: 0px 6px 18px rgba(0,0,0,0.06);
+}
 
-    .dashboard-header h2 {
-        color: #1e40af;
-        font-weight: 700;
-        font-size: 1.8rem;
-    }
+.dashboard-header h2 {
+    font-size: 2.35rem;
+    font-weight: 700;
+    color: #0f172a;
+}
 
-    .dashboard-header p {
-        color: #64748b;
-        margin-top: 0.25rem;
-        font-size: 0.95rem;
-    }
+.dashboard-header p {
+    color: #64748b;
+    margin-top: .25rem;
+    font-size: .96rem;
+}
 
-    /* Statistik Card */
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 1.2rem;
-        margin-bottom: 2rem;
-    }
+/* ----------------------------------------------------------
+   STATISTIC CARDS
+---------------------------------------------------------- */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.7rem;
+    margin-bottom: 2.8rem;
+}
 
-    .stat-card {
-        background: #fff;
-        border-radius: 12px;
-        padding: 1.5rem;
-        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
-        transition: all 0.25s ease;
-        text-align: center;
-        border: 1px solid #e2e8f0;
-    }
+.stat-card {
+    background: rgba(255, 255, 255, 0.92);
+    border-radius: 20px;
+    padding: 2rem 1.5rem;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 12px 28px rgba(0,0,0,0.07);
+    position: relative;
+    overflow: hidden;
+    transition: 0.3s ease;
+    backdrop-filter: blur(6px);
+}
 
-    .stat-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
-    }
+.stat-card::after {
+    content: '';
+    position: absolute;
+    top: -30%;
+    right: -30%;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: rgba(37, 99, 235, 0.08);
+}
 
-    .stat-card i {
-        font-size: 2rem;
-        margin-bottom: 0.6rem;
-        display: inline-block;
-    }
+.stat-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.1);
+}
 
-    .stat-card h6 {
-        color: #64748b;
-        font-size: 0.9rem;
-        margin-bottom: 0.4rem;
-        font-weight: 500;
-    }
+.stat-icon {
+    font-size: 2.6rem;
+    margin-bottom: .7rem;
+}
 
-    .stat-card h3 {
-        font-weight: 700;
-        font-size: 1.7rem;
-        margin: 0;
-    }
+.stat-label {
+    font-size: .92rem;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: .4rem;
+}
 
-    .text-primary { color: #2563eb !important; }
-    .text-warning { color: #f59e0b !important; }
-    .text-success { color: #16a34a !important; }
-    .text-info { color: #0ea5e9 !important; }
+.stat-value {
+    font-size: 2.4rem;
+    font-weight: 800;
+}
 
-    /* Tabel & Card */
-    .list-card {
-        background: #fff;
-        border-radius: 12px;
-        border: 1px solid #e2e8f0;
-        overflow: hidden;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-    }
+/* ----------------------------------------------------------
+   TABLE WRAPPER
+---------------------------------------------------------- */
+.table-wrapper {
+    background: #ffffff;
+    border-radius: 20px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+    overflow: hidden;
+}
 
-    .list-card .card-header {
-        background: #fff;
-        padding: 1.25rem 1.5rem;
-        border-bottom: 1px solid #e2e8f0;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
+.table-wrapper .header {
+    padding: 1.6rem 1.8rem;
+    border-bottom: 1px solid #e2e8f0;
+    background: linear-gradient(to right, #f1f5f9, #eaefff);
+}
 
-    .list-card .card-header h5 {
-        margin: 0;
-        font-weight: 700;
-        color: #1e293b;
-        font-size: 1.1rem;
-    }
+.table-wrapper h5 {
+    margin: 0;
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: #1e293b;
+}
 
-    .table {
-        width: 100%;
-        border-collapse: collapse;
-    }
+/* ----------------------------------------------------------
+   TABLE
+---------------------------------------------------------- */
+.table thead th {
+    background: #f1f5f9;
+    padding: 1.1rem;
+    text-transform: uppercase;
+    font-size: .74rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    color: #475569;
+    border-bottom: 1px solid #e2e8f0;
+}
 
-    .table th {
-        background-color: #f8fafc;
-        font-weight: 600;
-        color: #475569;
-        text-transform: uppercase;
-        font-size: 0.75rem;
-        letter-spacing: 0.05em;
-        padding: 1rem;
-        border-bottom: 1px solid #e2e8f0;
-    }
+.table tbody tr {
+    transition: 0.2s ease;
+}
 
-    .table td {
-        padding: 1rem;
-        border-bottom: 1px solid #e2e8f0;
-        vertical-align: middle;
-        font-size: 0.9rem;
-    }
+.table tbody tr:hover {
+    background: #f8fafc;
+}
 
-    .empty-state {
-        text-align: center;
-        color: #94a3b8;
-        padding: 4rem 1rem;
-    }
+.table tbody td {
+    padding: 1rem;
+    font-size: .93rem;
+    border-bottom: 1px solid #e2e8f0;
+}
 
-    /* --- PERBAIKAN TOMBOL AKSI --- */
-    .action-buttons {
-        display: flex;
-        justify-content: center;
-        gap: 8px; /* Jarak antar tombol */
-    }
+/* STATUS BADGES */
+.badge-status {
+    padding: .48rem .9rem;
+    border-radius: 16px;
+    font-size: .76rem;
+    font-weight: 700;
+}
 
-    /* Style Tombol dengan Teks */
-    .btn-action {
-        padding: 6px 12px;
-        border-radius: 6px;
-        font-size: 0.85rem;
-        font-weight: 500;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        text-decoration: none;
-        color: white;
-        transition: all 0.2s ease;
-        border: none;
-    }
+.bg-wait { background: #fff7d6; color: #9a6800; }
+.bg-proc { background: #dbeafe; color: #1e3a8a; }
+.bg-done { background: #d1fae5; color: #065f46; }
 
-    .btn-action:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        color: white;
-    }
+/* ----------------------------------------------------------
+   ACTION BUTTONS
+---------------------------------------------------------- */
+.action-buttons {
+    display: flex;
+    gap: .6rem;
+    justify-content: center;
+}
 
-    /* Warna Tombol */
-    .btn-detail {
-        background-color: #64748b; /* Abu-abu Slate */
-    }
-    .btn-detail:hover { background-color: #475569; }
+.btn-action {
+    padding: 7px 16px;
+    border-radius: 10px;
+    font-size: .84rem;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    border: none;
+    color: white;
+    transition: .25s;
+    font-weight: 500;
+}
 
-    .btn-response {
-        background-color: #2563eb; /* Biru */
-    }
-    .btn-response:hover { background-color: #1d4ed8; }
+.btn-action:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+}
 
-    .btn-success-static {
-        background-color: #10b981; /* Hijau */
-        cursor: default;
-    }
-    
-    @media (max-width: 768px) {
-        .dashboard-petugas { padding: 1rem; }
-        .dashboard-header h2 { font-size: 1.4rem; }
-        .btn-action span { display: none; } /* Sembunyikan teks di HP kecil */
-    }
+.btn-detail { background: #475569; }
+.btn-detail:hover { background: #334155; }
+
+.btn-response { background: #2563eb; }
+.btn-response:hover { background: #1d4ed8; }
+
+.btn-static {
+    background: #16a34a;
+    cursor: default;
+}
+
+/* EMPTY STATE */
+.empty-state {
+    padding: 4rem 1rem;
+    text-align: center;
+    color: #94a3b8;
+}
+
+.empty-state i {
+    opacity: .75;
+}
+
+@media (max-width: 768px) {
+    .btn-action span { display: none; }
+    .dashboard-header h2 { font-size: 1.7rem; }
+}
 </style>
 
-<div class="dashboard-petugas">
 
-    {{-- Header --}}
+<div class="dashboard-container">
+
+    {{-- HEADER --}}
     <div class="dashboard-header">
-        <div>
-            <h2>Dashboard Petugas</h2>
-            <p class="mb-0">
-                Selamat bekerja, <strong>{{ optional(auth('petugas')->user())->nama ?? 'Petugas' }}</strong>
-            </p>
-        </div>
+        <h2>Dashboard Petugas</h2>
+        <p>Selamat bekerja, <strong>{{ optional(auth('petugas')->user())->nama ?? 'Petugas' }}</strong></p>
     </div>
 
-    {{-- Statistik --}}
+    {{-- STATISTICS --}}
     <div class="stats-grid">
+
         <div class="stat-card">
-            <i class="bi bi-clipboard-data text-primary"></i>
-            <h6>Total Pengaduan</h6>
-            <h3 class="text-primary">{{ $totalPengaduan ?? 0 }}</h3>
+            <i class="bi bi-clipboard-data text-primary stat-icon"></i>
+            <div class="stat-label">Total Pengaduan</div>
+            <div class="stat-value text-primary">{{ $totalPengaduan ?? 0 }}</div>
         </div>
+
         <div class="stat-card">
-            <i class="bi bi-exclamation-circle text-warning"></i>
-            <h6>Menunggu</h6>
-            <h3 class="text-warning">{{ $pengaduanBaru ?? 0 }}</h3>
+            <i class="bi bi-exclamation-circle text-warning stat-icon"></i>
+            <div class="stat-label">Menunggu</div>
+            <div class="stat-value text-warning">{{ $pengaduanBaru ?? 0 }}</div>
         </div>
+
         <div class="stat-card">
-            <i class="bi bi-hourglass-split text-info"></i>
-            <h6>Proses</h6>
-            <h3 class="text-info">{{ $diproses ?? 0 }}</h3>
+            <i class="bi bi-hourglass-split text-info stat-icon"></i>
+            <div class="stat-label">Proses</div>
+            <div class="stat-value text-info">{{ $diproses ?? 0 }}</div>
         </div>
+
         <div class="stat-card">
-            <i class="bi bi-check-circle-fill text-success"></i>
-            <h6>Selesai</h6>
-            <h3 class="text-success">{{ $selesai ?? 0 }}</h3>
+            <i class="bi bi-check-circle-fill text-success stat-icon"></i>
+            <div class="stat-label">Selesai</div>
+            <div class="stat-value text-success">{{ $selesai ?? 0 }}</div>
         </div>
+
     </div>
 
-    {{-- Tabel Pengaduan --}}
-    <div class="card list-card">
-        <div class="card-header">
+    {{-- TABLE --}}
+    <div class="table-wrapper">
+
+        <div class="header">
             <h5>Daftar Pengaduan Terbaru</h5>
         </div>
 
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table mb-0">
-                    <thead>
-                        <tr>
-                            <th class="text-center" width="5%">ID</th>
-                            <th width="20%">Pelapor</th>
-                            <th width="35%">Isi Laporan</th>
-                            <th class="text-center" width="15%">Tanggal</th>
-                            <th class="text-center" width="10%">Status</th>
-                            <th class="text-center" width="15%">Aksi</th>
-                        </tr>
-                    </thead>
+        <div class="table-responsive">
+            <table class="table mb-0">
+                <thead>
+                    <tr>
+                        <th class="text-center">ID</th>
+                        <th>Pelapor</th>
+                        <th>Isi Laporan</th>
+                        <th class="text-center">Tanggal</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-center">Aksi</th>
+                    </tr>
+                </thead>
 
-                    <tbody>
-                        @forelse ($pengaduan ?? [] as $item)
-                        <tr>
-                            <td class="text-center fw-bold text-secondary">#{{ $item->id_pengaduan }}</td>
+                <tbody>
+                    @forelse ($pengaduan ?? [] as $item)
+                    <tr>
 
-                            <td>
-                                <div class="fw-bold">{{ $item->masyarakat->nama ?? 'User Terhapus' }}</div>
-                                <div class="small text-muted">{{ $item->masyarakat->nik ?? '-' }}</div>
-                            </td>
+                        <td class="text-center fw-bold text-secondary">
+                            #{{ $item->id_pengaduan }}
+                        </td>
 
-                            <td>
-                                <span class="d-inline-block text-truncate" style="max-width: 250px;" title="{{ $item->isi_laporan }}">
-                                    {{ Str::limit($item->isi_laporan, 50) }}
-                                </span>
-                            </td>
+                        <td>
+                            <div class="fw-semibold">{{ $item->masyarakat->nama ?? 'User Terhapus' }}</div>
+                            <div class="small text-muted">{{ $item->masyarakat->nik ?? '-' }}</div>
+                        </td>
 
-                            <td class="text-center text-muted">
-                                {{ \Carbon\Carbon::parse($item->tanggal_pengaduan)->format('d/m/Y') }}
-                            </td>
+                        <td>
+                            <span class="d-inline-block text-truncate" style="max-width: 260px;">
+                                {{ Str::limit($item->isi_laporan, 60) }}
+                            </span>
+                        </td>
 
-                            <td class="text-center">
-                                @if($item->status == 'menunggu')
-                                    <span class="badge bg-warning text-dark rounded-pill px-3">Menunggu</span>
-                                @elseif($item->status == 'proses') 
-                                    <span class="badge bg-info text-white rounded-pill px-3">Proses</span>
-                                @else
-                                    <span class="badge bg-success rounded-pill px-3">Selesai</span>
-                                @endif
-                            </td>
+                        <td class="text-center text-muted">
+                            {{ \Carbon\Carbon::parse($item->tanggal_pengaduan)->format('d/m/Y') }}
+                        </td>
 
-                            <td class="text-center">
-                                <div class="action-buttons">
-                                    {{-- 1. Tombol Detail --}}
-                                    <a href="{{ route('petugas.pengaduan.show', $item->id_pengaduan) }}" 
-                                       class="btn-action btn-detail" 
-                                       title="Lihat Detail">
-                                        <i class="bi bi-eye"></i> <span>Detail</span>
+                        <td class="text-center">
+                            @if($item->status == 'menunggu')
+                                <span class="badge-status bg-wait">Menunggu</span>
+
+                            @elseif($item->status == 'proses')
+                                <span class="badge-status bg-proc">Proses</span>
+
+                            @else
+                                <span class="badge-status bg-done">Selesai</span>
+                            @endif
+                        </td>
+
+                        <td class="text-center">
+                            <div class="action-buttons">
+
+                                <a href="{{ route('petugas.pengaduan.show', $item->id_pengaduan) }}"
+                                   class="btn-action btn-detail">
+                                    <i class="bi bi-eye"></i> <span>Detail</span>
+                                </a>
+
+                                @if($item->status != 'selesai')
+                                    <a href="{{ route('petugas.pengaduan.tanggapan', $item->id_pengaduan) }}"
+                                       class="btn-action btn-response">
+                                        <i class="bi bi-chat-text"></i> <span>Tanggapi</span>
                                     </a>
+                                @else
+                                    <span class="btn-action btn-static">
+                                        <i class="bi bi-check-circle"></i> <span>Selesai</span>
+                                    </span>
+                                @endif
 
-                                    {{-- 2. Tombol Tanggapan --}}
-                                    @if($item->status != 'selesai')
-                                        <a href="{{ route('petugas.pengaduan.tanggapan', $item->id_pengaduan) }}" 
-                                           class="btn-action btn-response" 
-                                           title="Beri Tanggapan">
-                                            <i class="bi bi-chat-text"></i> <span>Tanggapi</span>
-                                        </a>
-                                    @else
-                                        <span class="btn-action btn-success-static">
-                                            <i class="bi bi-check-circle"></i> <span>Selesai</span>
-                                        </span>
-                                    @endif
-                                </div>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="6" class="empty-state">
-                                <i class="bi bi-inbox fs-1 mb-3 d-block text-gray-300"></i>
-                                Tidak ada pengaduan yang perlu diproses saat ini.
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-            
-            {{-- Pagination --}}
-            @if(method_exists($pengaduan, 'links'))
-                <div class="p-3 border-top">
-                    {{ $pengaduan->links() }}
-                </div>
-            @endif
+                            </div>
+                        </td>
+
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="6" class="empty-state">
+                            <i class="bi bi-inbox fs-1"></i>
+                            <div class="mt-2">Tidak ada pengaduan saat ini.</div>
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
+
+        {{-- PAGINATION --}}
+        @if(method_exists($pengaduan, 'links'))
+            <div class="p-3 border-top">
+                {{ $pengaduan->links() }}
+            </div>
+        @endif
+
     </div>
 
 </div>
+
 @endsection

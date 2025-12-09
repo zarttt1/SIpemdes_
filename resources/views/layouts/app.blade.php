@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'SIPEMDES')</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
     <style>
         :root {
             --primary-blue: #0B5ED7;
@@ -119,38 +120,64 @@
             flex: 1;
         }
     </style>
+
 </head>
 <body class="page-container">
+
+    <!-- ========================= NAVBAR ========================= -->
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
-            <a class="navbar-brand" href="/">Sistem Informasi Pengaduan Masyarakat Desa
-            </a>
+            <a class="navbar-brand" href="/">Sistem Informasi Pengaduan Masyarakat Desa</a>
+
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
+
             <div class="collapse navbar-collapse" id="navbarNav">
                 <div class="ms-auto">
-                    @auth('web')
-                        <span class="text-white me-3">{{ auth('web')->user()->nama }}</span>
+
+                    {{-- PRIORITAS LOGIN: PETUGAS → MASYARAKAT → GUEST --}}
+
+                    {{-- Jika login sebagai petugas/admin --}}
+                    @if(auth('petugas')->check())
+
+                        <span class="text-white me-3">
+                            {{ auth('petugas')->user()->nama }} 
+                            ({{ ucfirst(auth('petugas')->user()->level) }})
+                        </span>
+
                         <form action="{{ route('logout') }}" method="POST" class="d-inline">
                             @csrf
                             <button type="submit" class="btn btn-light btn-sm">Logout</button>
                         </form>
-                    @endauth
-                    @auth('petugas')
-                        <span class="text-white me-3">{{ auth('petugas')->user()->nama }} ({{ auth('petugas')->user()->level }})</span>
+
+                    {{-- Jika login sebagai masyarakat --}}
+                    @elseif(auth('web')->check())
+
+                        <span class="text-white me-3">
+                            {{ auth('web')->user()->nama }}
+                        </span>
+
                         <form action="{{ route('logout') }}" method="POST" class="d-inline">
                             @csrf
                             <button type="submit" class="btn btn-light btn-sm">Logout</button>
                         </form>
-                    @endauth
+
+                    {{-- Jika belum login --}}
+                    @else
+                        <a href="{{ route('login') }}" class="btn btn-light btn-sm">Login</a>
+                    @endif
+
                 </div>
             </div>
         </div>
     </nav>
+    <!-- ========================================================== -->
 
     <div class="content">
         <div class="container my-4">
+
+            {{-- ERROR HANDLING --}}
             @if ($errors->any())
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
                     <strong>Error!</strong>
@@ -163,6 +190,7 @@
                 </div>
             @endif
 
+            {{-- SUCCESS --}}
             @if (session('success'))
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                     {{ session('success') }}
@@ -170,6 +198,7 @@
                 </div>
             @endif
 
+            {{-- ERROR MESSAGE --}}
             @if (session('error'))
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
                     {{ session('error') }}
@@ -181,6 +210,7 @@
         </div>
     </div>
 
+    <!-- ========================= FOOTER ========================= -->
     <footer>
         <div class="container">
             <div class="row">
@@ -194,8 +224,10 @@
             </div>
         </div>
     </footer>
+    <!-- ========================================================== -->
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     @yield('scripts')
+
 </body>
 </html>
