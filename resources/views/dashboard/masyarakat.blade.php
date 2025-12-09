@@ -16,7 +16,6 @@
         padding-bottom: 40px;
     }
 
-    /* Header Card */
     .header-card {
         background: linear-gradient(135deg, #1e40af, #3b82f6);
         border-radius: 16px;
@@ -25,7 +24,6 @@
         color: white;
     }
 
-    /* Statistik */
     .stat-card {
         border-radius: 14px;
         padding: 22px;
@@ -41,7 +39,6 @@
         box-shadow: 0 10px 20px rgba(0,0,0,0.08);
     }
 
-    /* Table */
     .table thead th {
         background: #f8fafc !important;
         text-transform: uppercase;
@@ -61,18 +58,6 @@
 
     .table-hover tbody tr:hover {
         background: #f1f5f9;
-    }
-
-    .dropdown-menu {
-        position: absolute !important;
-        transform: translate(0, 38px) !important;
-        z-index: 10;
-    }
-
-    .badge {
-        padding: 8px 14px !important;
-        font-size: .7rem;
-        font-weight: 600;
     }
 
     .no-data {
@@ -106,33 +91,41 @@
         </div>
     @endif
 
+    {{-- HITUNG STATISTIK OTOMATIS --}}
+    @php
+        $total = $pengaduan->count();
+        $baru = $pengaduan->where('status', 'menunggu')->count();
+        $diproses = $pengaduan->where('status', 'proses')->count();
+        $selesai = $pengaduan->where('status', 'selesai')->count();
+    @endphp
+
     {{-- STATISTIK --}}
     <div class="row g-3 mb-4">
         <div class="col-6 col-md-3">
             <div class="stat-card">
                 <h6>Total Pengaduan</h6>
-                <h3 class="text-primary">{{ $total ?? 0 }}</h3>
+                <h3 class="text-primary">{{ $total }}</h3>
             </div>
         </div>
 
         <div class="col-6 col-md-3">
             <div class="stat-card">
                 <h6>Baru</h6>
-                <h3 class="text-info">{{ $baru ?? 0 }}</h3>
+                <h3 class="text-info">{{ $baru }}</h3>
             </div>
         </div>
 
         <div class="col-6 col-md-3">
             <div class="stat-card">
                 <h6>Diproses</h6>
-                <h3 class="text-warning">{{ $diproses ?? 0 }}</h3>
+                <h3 class="text-warning">{{ $diproses }}</h3>
             </div>
         </div>
 
         <div class="col-6 col-md-3">
             <div class="stat-card">
                 <h6>Selesai</h6>
-                <h3 class="text-success">{{ $selesai ?? 0 }}</h3>
+                <h3 class="text-success">{{ $selesai }}</h3>
             </div>
         </div>
     </div>
@@ -162,14 +155,12 @@
                         <tr>
                             <td class="text-center fw-semibold text-muted">{{ $i + 1 }}</td>
 
-                            {{-- ISI LAPORAN --}}
                             <td>
                                 <span class="d-inline-block text-truncate" style="max-width: 260px;">
                                     {{ Str::limit($item->isi_laporan, 70) }}
                                 </span>
                             </td>
 
-                            {{-- FOTO --}}
                             <td class="text-center">
                                 @if ($item->foto)
                                     <img src="{{ asset('storage/' . $item->foto) }}"
@@ -181,7 +172,6 @@
                                 @endif
                             </td>
 
-                            {{-- STATUS --}}
                             <td class="text-center">
                                 @if ($item->status == 'menunggu')
                                     <span class="badge bg-warning text-dark rounded-pill">Menunggu</span>
@@ -192,28 +182,20 @@
                                 @endif
                             </td>
 
-                            {{-- TANGGAL --}}
                             <td class="text-center text-muted small">
                                 {{ $item->created_at->format('d/m/Y') }}
                             </td>
 
-                            {{-- AKSI --}}
                             <td class="text-center">
                                 <div class="d-flex justify-content-center gap-1">
-
-                                    {{-- DETAIL --}}
                                     <a href="{{ route('pengaduan.show', $item->id_pengaduan) }}"
-                                       class="btn btn-sm btn-outline-primary">
-                                        Detail
-                                    </a>
+                                       class="btn btn-sm btn-outline-primary">Detail</a>
 
-                                    {{-- CHAT --}}
                                     <a href="{{ route('pengaduan.tanggapan', $item->id_pengaduan) }}"
                                        class="btn btn-sm {{ $item->tanggapan->count() ? 'btn-success text-white' : 'btn-outline-secondary' }}">
                                         Chat
                                     </a>
 
-                                    {{-- OPSI --}}
                                     @if ($item->status == 'menunggu')
                                         <div class="dropdown">
                                             <button class="btn btn-sm btn-light border dropdown-toggle"
